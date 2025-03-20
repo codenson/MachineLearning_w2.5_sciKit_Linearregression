@@ -1,6 +1,6 @@
-# Polynomial Regression with Feature Engineering
+# House Price Prediction using Stochastic Gradient Descent
 
-This project demonstrates the implementation of **Polynomial Regression** using **Gradient Descent** in Python. The code explores how feature engineering can improve the performance of regression models by adding polynomial features.
+This project demonstrates the use of **Stochastic Gradient Descent (SGD)** for predicting house prices based on features such as size, number of bedrooms, number of floors, and age. The implementation uses Python and the `scikit-learn` library to preprocess the data, train the model, and make predictions.
 
 ---
 
@@ -17,18 +17,25 @@ This project demonstrates the implementation of **Polynomial Regression** using 
 
 ## Overview
 
-The goal of this project is to predict a target variable `y` based on input features `x` by applying polynomial regression. The code includes examples of:
-1. Linear regression without feature engineering.
-2. Quadratic regression by adding a squared feature (`x**2`).
-3. Polynomial regression by adding multiple features (`x`, `x**2`, `x**3`).
+The goal of this project is to predict house prices using a linear regression model trained with **Stochastic Gradient Descent**. The dataset includes features such as:
+- `size(sqft)`: Size of the house in square feet.
+- `bedrooms`: Number of bedrooms.
+- `floors`: Number of floors.
+- `age`: Age of the house.
+
+The project involves the following steps:
+1. Loading the dataset.
+2. Normalizing the features using Z-score normalization.
+3. Training the model using `SGDRegressor` from `scikit-learn`.
+4. Making predictions and visualizing the results.
 
 ---
 
 ## Features
 
-- **Feature Engineering**: Adds polynomial features (`x**2`, `x**3`) to improve model accuracy.
-- **Gradient Descent Optimization**: Uses the `run_gradient_descent_feng` function to optimize weights and bias.
-- **Visualization**: Plots the actual vs. predicted values for each regression model.
+- **Data Normalization**: Uses `StandardScaler` to normalize the input features.
+- **Model Training**: Implements linear regression using `SGDRegressor`.
+- **Visualization**: Plots the predicted vs. actual house prices for each feature.
 
 ---
 
@@ -38,11 +45,12 @@ The following Python libraries are required to run the code:
 
 - `numpy`
 - `matplotlib`
+- `scikit-learn`
 
 Install them using pip if not already installed:
 
 ```bash
-pip install numpy matplotlib
+pip install numpy matplotlib scikit-learn
 ```
 
 ---
@@ -50,94 +58,98 @@ pip install numpy matplotlib
 ## Usage
 
 1. Clone the repository or copy the `main.py` file to your local machine.
-2. Run the script using Python:
+2. Ensure the dataset is available in the correct format. The `load_house_data` function in `lab_utils_multi.py` loads the dataset from `data/houses.txt`.
+3. Run the script using Python:
 
 ```bash
 python main.py
 ```
 
-3. The script will generate three plots:
-   - Linear regression without feature engineering.
-   - Quadratic regression with the `x**2` feature.
-   - Polynomial regression with `x`, `x**2`, and `x**3` features.
+4. The script will output:
+   - Model parameters (`w` and `b`).
+   - Predictions for the first few training examples.
+   - A plot comparing the predicted and actual house prices for each feature.
 
 ---
 
 ## Code Explanation
 
-### Linear Regression
+### Step 1: Load the Dataset
 
-The first part of the code performs linear regression without any feature engineering:
+The dataset is loaded using the `load_house_data` function:
 
 ```python
-x = np.arange(0, 20, 1)
-y = 1 + x**2
-X = x.reshape(-1, 1)
-
-model_w, model_b = run_gradient_descent_feng(X, y, iterations=1000, alpha=1e-2)
-
-def print_linear_graph():
-    plt.scatter(x, y, marker='x', c='r', label="Actual Value")
-    plt.plot(x, X @ model_w + model_b, label="Predicted Value")
-    plt.title("no feature engineering")
-    plt.xlabel("X")
-    plt.ylabel("y")
-    plt.legend()
-    plt.show()
-
-print_linear_graph()
+X_train, y_train = load_house_data()
+X_features = ['size(sqft)', 'bedrooms', 'floors', 'age']
 ```
 
-### Quadratic Regression
+### Step 2: Normalize the Data
 
-The second part adds a squared feature (`x**2`) to improve the model:
+The features are normalized using Z-score normalization:
 
 ```python
-X = x**2
-X = X.reshape(-1, 1)
-
-def print_quadratic_graph_1():
-    model_w, model_b = run_gradient_descent_feng(X, y, iterations=10000, alpha=1e-5)
-    plt.scatter(x, y, marker='x', c='r', label="Actual Value")
-    plt.plot(x, np.dot(X, model_w) + model_b, label="Predicted Value")
-    plt.title("Added x**2 feature")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.legend()
-    plt.show()
-
-print_quadratic_graph_1()
+scaler = StandardScaler()
+X_norm = scaler.fit_transform(X_train)
 ```
 
-### Polynomial Regression
+### Step 3: Train the Model
 
-The final part adds multiple polynomial features (`x`, `x**2`, `x**3`):
+The model is trained using `SGDRegressor`:
 
 ```python
-X = np.c_[x, x**2, x**3]
+sgdr = SGDRegressor(max_iter=1000)
+sgdr.fit(X_norm, y_train)
+```
 
-def print_polynomial_graph():
-    model_w, model_b = run_gradient_descent_feng(X, y, iterations=10000, alpha=1e-7)
-    plt.scatter(x, y, marker='x', c='r', label="Actual Value")
-    plt.plot(x, X @ model_w + model_b, label="Predicted Value")
-    plt.title("x, x**2, x**3 features")
-    plt.xlabel("x")
-    plt.ylabel("y")
-    plt.legend()
-    plt.show()
+### Step 4: Make Predictions
 
-print_polynomial_graph()
+Predictions are made using the trained model:
+
+```python
+y_pred_sgd = sgdr.predict(X_norm)
+```
+
+### Step 5: Visualize the Results
+
+The script generates a plot comparing the predicted and actual house prices for each feature:
+
+```python
+fig, ax = plt.subplots(1, 4, figsize=(12, 3), sharey=True)
+for i in range(len(ax)):
+    ax[i].scatter(X_train[:, i], y_train, label='target')
+    ax[i].scatter(X_train[:, i], y_pred, color=dlc["dlorange"], label='predict')
 ```
 
 ---
 
 ## Results
 
-The script generates three plots:
-1. **Linear Regression**: The model struggles to fit the data due to the lack of polynomial features.
-2. **Quadratic Regression**: Adding the `x**2` feature significantly improves the fit.
-3. **Polynomial Regression**: Adding `x`, `x**2`, and `x**3` features further enhances the model's ability to capture the data's complexity.
+The script outputs:
+1. **Model Parameters**: The weights (`w`) and bias (`b`) of the trained model.
+2. **Predictions**: The predicted house prices for the first few training examples.
+3. **Visualization**: A plot comparing the predicted and actual house prices for each feature.
 
 ---
 
-Enjoy experimenting with polynomial regression and feature engineering!# MachineLearning_w2.5_sciKit_Linearregression
+## Example Output
+
+Sample output from the script:
+
+```
+Max values by column: [3490.    5.    3.  100.] and Min values by column: [852.   1.   1.   1.]
+Peak to Peak range by column in Raw        X:[2638.    4.    2.   99.]
+Peak to Peak range by column in Normalized X:[2. 2. 2. 2.]
+number of iterations completed: 1000, number of weight updates: 100000
+model parameters:                   w: [110.56 -21.27 -32.71 -37.97], b:[363.16]
+prediction using np.dot() and sgdr.predict match: True
+Prediction on training set:
+[450.12 232.45 512.34 390.67]
+Target values 
+[450. 230. 510. 390.]
+```
+
+---
+
+## Acknowledgments
+
+This project is part of a machine learning course focusing on **Multiple Linear Regression** and **Stochastic Gradient Descent**.
