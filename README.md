@@ -130,6 +130,7 @@ The script outputs:
 3. **Visualization**: A plot comparing the predicted and actual house prices for each feature.
 
 ---
+## Final Model : y=110.56×size−21.27×bedrooms−32.71×floors−37.97×age+363.16
 
 ## Example Output
 
